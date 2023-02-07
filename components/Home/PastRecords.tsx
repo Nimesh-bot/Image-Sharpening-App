@@ -66,6 +66,7 @@ const PastRecords = () => {
                     modalVisible={modalVisible}
                     closeModal={() => setModalVisible(false)}
                     record={record}
+                    setModal={setModalVisible}
                 />
             }
         </>

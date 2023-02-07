@@ -1,18 +1,65 @@
 import { View, Text, Modal, StyleSheet, Image, TouchableOpacity, Dimensions } from 'react-native'
-import React, { useState } from 'react'
+import React, { useCallback, useState } from 'react'
 
 import { RecordType } from '../../@types/record'
 
 import { Ionicons } from '@expo/vector-icons';
 import { MaterialIcons } from '@expo/vector-icons';
 import { IModalProps } from '../../@types/modal';
+import { BASE_URL } from '../../config/axios.config';
+import Toast from 'react-native-toast-message';
+import useDeleteRecord from '../../hooks/useDeleteRecord';
 
 const globalStyles = require('../../styles/global')
 const imageWidth = Dimensions.get('window').width - 50;
 
-const RecordsViewerModal = ({ modalVisible, closeModal, record }: IModalProps) => {
+const RecordsViewerModal = ({ modalVisible, closeModal, record, setModal }: IModalProps) => {
     const [isOriginal, setIsOriginal] = useState(true);
   
+    const handleSuccess = (data: any) => {
+        Toast.show(
+            {
+                type: 'success',
+                text1: 'Record Deleted',
+                text2: `Record ${record} has been deleted successfully`,
+                visibilityTime: 4000,
+                autoHide: true,
+                topOffset: 30,
+                bottomOffset: 40,
+            }
+        )
+        setModal(false);
+    }
+
+    const handleError = (error: any) => {
+        console.log(error);
+        Toast.show({
+            type: 'error',
+            text1: 'Something went wrong. Please try again',
+        })
+    }
+
+    const { mutate, isLoading } = useDeleteRecord(
+        handleSuccess,
+        handleError
+    ) 
+
+    if(isLoading) {
+        return (
+            <Modal
+                transparent={false}
+                visible={modalVisible}
+                onRequestClose={closeModal}
+            >
+                <View style={globalStyles.loadingContainer}></View>
+            </Modal>
+        )
+    }
+
+    const onDelete = () => {
+        mutate(record);
+    }
+
     return (
         <Modal
             animationType="slide"
@@ -22,12 +69,12 @@ const RecordsViewerModal = ({ modalVisible, closeModal, record }: IModalProps) =
         >
             <View style={globalStyles.container}>
                 <View style={globalStyles.header}>
-                    <Text style={globalStyles.headingText}>Record - {record.date}</Text>
+                    <Text style={globalStyles.headingText}>Record - {record}</Text>
                     <View style={{ display: 'flex', flexDirection: 'row', alignItems: 'center' }}>
                         <TouchableOpacity onPress={closeModal}>
                             <Ionicons name="close" size={24} color="black" />
                         </TouchableOpacity>
-                        <TouchableOpacity>
+                        <TouchableOpacity onPress={onDelete}>
                             <MaterialIcons name="delete" size={24} color="#1E56A0" style={{ marginLeft: 10 }}/>
                         </TouchableOpacity>
                     </View>
@@ -41,8 +88,13 @@ const RecordsViewerModal = ({ modalVisible, closeModal, record }: IModalProps) =
                         <Text style={!isOriginal && styles.selectedText}>Result</Text>
                     </TouchableOpacity>
                 </View>
-
-                <Image source={isOriginal ? record.original : record.result} style={styles.image} />
+                
+                {
+                    isOriginal ?
+                    <Image source={{ uri: `${BASE_URL}output/${record}/original.jpg` }} style={styles.image} />
+                    :
+                    <Image source={{ uri: `${BASE_URL}output/${record}/sharpened.jpg` }} style={styles.image} />
+                }
             </View>
         </Modal>
     )
