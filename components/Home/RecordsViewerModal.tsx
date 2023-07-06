@@ -9,6 +9,8 @@ import { IModalProps } from '../../@types/modal';
 import { BASE_URL } from '../../config/axios.config';
 import Toast from 'react-native-toast-message';
 import useDeleteRecord from '../../hooks/useDeleteRecord';
+import { useDispatch } from 'react-redux';
+import { getResults } from '../../redux/apiSlice';
 
 const globalStyles = require('../../styles/global')
 const imageWidth = Dimensions.get('window').width - 50;
@@ -16,6 +18,8 @@ const imageWidth = Dimensions.get('window').width - 50;
 const RecordsViewerModal = ({ modalVisible, closeModal, record, setModal }: IModalProps) => {
     const [isOriginal, setIsOriginal] = useState(true);
   
+    const dispatch = useDispatch();
+
     const handleSuccess = (data: any) => {
         Toast.show(
             {
@@ -29,6 +33,7 @@ const RecordsViewerModal = ({ modalVisible, closeModal, record, setModal }: IMod
             }
         )
         setModal(false);
+        dispatch(getResults() as any)
     }
 
     const handleError = (error: any) => {
@@ -91,9 +96,9 @@ const RecordsViewerModal = ({ modalVisible, closeModal, record, setModal }: IMod
                 
                 {
                     isOriginal ?
-                    <Image source={{ uri: `${BASE_URL}output/${record}/original.jpg` }} style={styles.image} />
+                    <Image source={{ uri: `${BASE_URL}/output/${record}/original.jpg` }} style={styles.image} />
                     :
-                    <Image source={{ uri: `${BASE_URL}output/${record}/sharpened.jpg` }} style={styles.image} />
+                    <Image source={{ uri: `${BASE_URL}/output/${record}/sharpened.jpg` }} style={styles.image} />
                 }
             </View>
         </Modal>

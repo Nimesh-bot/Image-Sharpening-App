@@ -45,5 +45,12 @@ module.exports = StyleSheet.create({
         display: 'flex',
         justifyContent: 'center',
         alignItems: 'center',
+    },
+    textInputStyle: {
+        height: 45,
+        borderRadius: 10,
+        borderWidth: 1,
+        borderColor: '#14141515',
+        paddingHorizontal: 10,
     }
 })

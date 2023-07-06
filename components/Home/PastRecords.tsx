@@ -1,14 +1,15 @@
 import { View, Text, StyleSheet, Image, Pressable, ActivityIndicator } from 'react-native'
-import React from 'react'
+import React, { useEffect } from 'react'
 
-import { useQuery } from '@tanstack/react-query';
 import { MaterialIcons } from '@expo/vector-icons'
 ;
-import { pastDatas } from '../../data/past';
-import { RecordType } from '../../@types/record';
-import { AppAxios, BASE_URL } from '../../config/axios.config';
+import { BASE_URL } from '../../config/axios.config';
 
 import RecordsViewerModal from './RecordsViewerModal';
+
+import { useSelector, useDispatch } from 'react-redux';
+import { Result, getResults } from '../../redux/apiSlice';
+import { RootState } from '../../redux/store.js';
 
 const globalStyles = require('../../styles/global')
 
@@ -18,18 +19,19 @@ interface Data {
 
 const PastRecords = () => {
     const [modalVisible, setModalVisible] = React.useState(false)
-    const [record, setRecord] = React.useState<string>()
+    const [record, setRecord] = React.useState<Data>()
 
-    const { data, isLoading, error } = useQuery<Data>(['pastRecords'], async () => {
-        const response = await AppAxios.get('/results')
-        return response.data
-    })
+    const { loading, results } = useSelector((state: RootState) => ({ ...state.api }))
 
-    const results = data?.results
-    console.log('results: ', results)
-    console.log('error', error)
+    const dispatch = useDispatch()
 
-    if(isLoading) {
+    useEffect(() => {
+        dispatch(getResults() as any)
+    }, [dispatch])
+
+    console.log(results, BASE_URL)
+    
+    if(loading) {
         return (
             <View style={globalStyles.loadingContainer}>
                 <ActivityIndicator size="large" color="#1E56A0" />
@@ -46,13 +48,11 @@ const PastRecords = () => {
                 </View>
                 <View style={styles.recordsGrid}>
                     {
-                        data?.results.map((item, index) => (
+                        results?.map((item: any, index: number) => (
                             <Pressable style={styles.records} key={index} onPress={() => {setRecord(item); setModalVisible(true)}}>
                                 <View style={styles.imageStack}>
-                                    {/* <Image source={{ uri: `${BASE_URL}output/${item}/original.jpg` }} style={styles.original} />
-                                    <Image source={{ uri: `http://192.168.1.64:8000/output/${item}/sharpened.jpg` }} style={styles.original} /> */}
-                                    <Image source={{ uri: `${BASE_URL}output/${item}/original.jpg`}} style={styles.original } />
-                                    <Image source={{ uri: `${BASE_URL}output/${item}/sharpened.jpg`}} style={styles.sharpened } />
+                                    <Image source={{ uri: `${BASE_URL}/output/${item}/original.jpg`}} style={styles.original } />
+                                    <Image source={{ uri: `${BASE_URL}/output/${item}/sharpened.jpg`}} style={styles.sharpened } />
                                 </View>
                                 <Text style={globalStyles.text}>{item}</Text>
                             </Pressable>
