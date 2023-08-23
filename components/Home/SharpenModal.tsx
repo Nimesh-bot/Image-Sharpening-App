@@ -13,10 +13,10 @@ import {
 
 import * as FileSystem from "expo-file-system";
 import * as MediaLibrary from "expo-media-library";
+import * as Permissions from "expo-permissions";
 
 import { Ionicons } from "@expo/vector-icons";
 
-import moment from "moment";
 import Toast from "react-native-toast-message";
 import { useDispatch } from "react-redux";
 import { IModalProps } from "../../@types/modal";
@@ -131,34 +131,23 @@ const SharpenModal = ({ modalVisible, closeModal, image }: IModalProps) => {
     reMutate(formData);
   };
 
-  const handleDownload = async () => {
-    let date = moment().format("YYYYMMDDhhmmss");
-    let fileUri = FileSystem.documentDirectory + `${date}.jpg`;
-    try {
-      const res = await FileSystem.downloadAsync(result, fileUri);
-      saveFile(res.uri);
-    } catch (err) {
-      console.log("FS Err: ", err);
-    }
+  const handleDownload = () => {
+    const uri = "http://techslides.com/demos/sample-videos/small.mp4";
+    let fileUri = FileSystem.documentDirectory + "small.mp4";
+    FileSystem.downloadAsync(uri, fileUri)
+      .then(({ uri }) => {
+        saveFile(uri);
+      })
+      .catch((error) => {
+        console.error(error);
+      });
   };
 
-  const saveFile = async (fileUri: any) => {
-    try {
+  const saveFile = async (fileUri: string) => {
+    const { status } = await Permissions.askAsync(Permissions.CAMERA_ROLL);
+    if (status === "granted") {
       const asset = await MediaLibrary.createAssetAsync(fileUri);
-      const album = await MediaLibrary.getAlbumAsync("Download_Sharpened");
-      if (album == null) {
-        await MediaLibrary.createAlbumAsync("Download_Sharpened", asset, false);
-      } else {
-        await MediaLibrary.addAssetsToAlbumAsync([asset], album, false);
-      }
-      console.log("Image Saved");
-      Toast.show({
-        type: "success",
-        text1: "Image Saved",
-      });
-      // deleteMutate(folderName);
-    } catch (err) {
-      console.log("Save err: ", err);
+      await MediaLibrary.createAlbumAsync("Download", asset, false);
     }
   };
 
