@@ -1,10 +1,13 @@
-import { StatusBar } from 'expo-status-bar';
-import { SafeAreaView, StyleSheet, Text, View } from 'react-native';
-import Routes from './Routes';
+import { StatusBar } from "expo-status-bar";
+import { LogBox, SafeAreaView, StyleSheet } from "react-native";
+import Routes from "./Routes";
 
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { Provider } from 'react-redux';
-import { store } from './redux/store';
+import { Provider } from "react-redux";
+import { store } from "./redux/store";
+
+LogBox.ignoreLogs(["Warning: ..."]); // Ignore log notification by message
+LogBox.ignoreAllLogs(); //Ignore all log notifications
 
 export default function App() {
   const queryClient = new QueryClient();
@@ -13,8 +16,8 @@ export default function App() {
     <Provider store={store}>
       <QueryClientProvider client={queryClient}>
         <SafeAreaView style={styles.container}>
-          <StatusBar style="dark" backgroundColor='#eeeeee' />
-            <Routes />
+          <StatusBar style="dark" backgroundColor="#eeeeee" />
+          <Routes />
         </SafeAreaView>
       </QueryClientProvider>
     </Provider>
@@ -24,6 +27,6 @@ export default function App() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#eeeeee',
+    backgroundColor: "#eeeeee",
   },
 });
